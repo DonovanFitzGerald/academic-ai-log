@@ -13,8 +13,7 @@ const TestAIChat = (props: { className?: string }) => {
     };
 
     const handleButtonPress = async () => {
-        const url =
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+        const url = '/api/ai';
         console.log('Request prompt:', inputText);
         try {
             setIsLoading(true);
@@ -22,18 +21,12 @@ const TestAIChat = (props: { className?: string }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-goog-api-key': 'AIzaSyCgMF-ZTqHq0YbCe6FfoNAjCnog_6u-u7k',
+                    'X-CSRF-TOKEN': document.head.querySelector(
+                        'meta[name="csrf-token"]',
+                    )?.content,
                 },
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: inputText,
-                                },
-                            ],
-                        },
-                    ],
+                    prompt: inputText,
                 }),
             });
             if (!response.ok) {
@@ -49,6 +42,7 @@ const TestAIChat = (props: { className?: string }) => {
         } catch (error) {
             setIsLoading(false);
             console.error(error.message);
+            setErrorMessage(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -66,9 +60,9 @@ const TestAIChat = (props: { className?: string }) => {
                 ) : (
                     <p>No response yet</p>
                 )}
-                {errorMessage ? null : (
+                {errorMessage ? (
                     <p className="text-red-500">{errorMessage}</p>
-                )}
+                ) : null}
                 <textarea
                     className="border-2 border-black p-4"
                     type="textarea"

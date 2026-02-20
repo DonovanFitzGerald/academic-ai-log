@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
@@ -14,28 +15,58 @@ Route::get('dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/ai-request', function () {
-    define('BASE_URL', 'https://api.flickr.com/services');
+Route::post('/api/ai', function (Request $request) {
+    $apiKey = getenv('GEMINI_API_KEY');
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
 
-    $apiKey= $_ENV['API_KEY'];
-    
-    $queryString = http_build_query([
-        'x-goog-api-key' => $apiKey,
-        'content_type' => 1,
-        'format' => 'php_serial',
-        'media' => 'photos',
-        'method' => 'flickr.photos.search',
-        'per_page' => 10,
-        'safe_search' => 1,
-    ]);
-    $requestUri = sprintf(
-        '%s/rest/?%s',
-        BASE_URL,
-        $queryString
-    );
-    $fp = fopen($requestUri, 'r');
-    return response('Hello World', 200)
-        ->header('Content-Type', 'text/plain');
+    $payload = [
+        "contents" => [
+            [
+                "parts" => [
+                    [
+                        "text" => $request->get("prompt"),
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    $jsonPayload = json_encode($payload);
+
+    try {
+        $ch = curl_init($url);
+
+        if ($ch === false) {
+            throw new Exception('Failed to initialize cURL session.');
+        }
+
+        $headers = [
+            'Content-Type: application/json',
+            'x-goog-api-key: ' . $apiKey
+        ];
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            throw new Exception('cURL Request Error: ' . curl_error($ch));
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode >= 400) {
+            throw new Exception("HTTP Error Code {$httpCode}. API Response: {$response}");
+        }
+
+        $responseData = json_decode($response, true);
+    } catch (Exception $error) {
+        file_put_contents('php://stderr', "AI API Error: " . $error->getMessage() . "\n");
+        return response()->json(['error' => $error->getMessage()], 500);
+    }
+    return $responseData;
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
