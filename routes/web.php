@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use App\Http\Controllers\AiController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
