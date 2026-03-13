@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\AiController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 

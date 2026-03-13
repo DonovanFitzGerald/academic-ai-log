@@ -2,98 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
 use App\Models\Chat;
+use App\Models\Message;
+use App\Services\AssistantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function store(Request $request, Chat $chat, AssistantService $assistantService)
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, Chat $chat)
-    {
-        $request->validate([
+        $validated = $request->validate([
             'content' => ['required', 'string'],
         ]);
 
-        DB::transaction(function () use ($chat, $request) {
+        $userMessage = DB::transaction(function () use ($chat, $validated) {
             $nextSequence = (Message::where('chat_id', $chat->id)
                 ->lockForUpdate()
                 ->max('sequence') ?? 0) + 1;
 
-            Message::create([
+            return Message::create([
                 'chat_id' => $chat->id,
                 'role' => 'user',
-                'content' => $request->input('content'),
+                'content' => $validated['content'],
                 'sequence' => $nextSequence,
-            ]);
-
-            $assistantReply = $this->fakeAssistantReply($request->input('content'));
-
-            Message::create([
-                'chat_id' => $chat->id,
-                'role' => 'assistant',
-                'content' => $assistantReply,
-                'sequence' => $nextSequence + 1,
             ]);
         });
 
-        return redirect()->route('chat.show', $chat);
-    }
+        $assistantReply = $assistantService->call($validated['content']);
 
-    protected function fakeAssistantReply(string $content): string
-    {
-        return "You said: {$content}";
-    }
+        $assistantText = data_get($assistantReply, 'candidates.0.content.parts.0.text');
 
+        if (!is_string($assistantText) || trim($assistantText) === '') {
+            $assistantText = 'No response returned.';
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Message $message)
-    {
-        //
-    }
+        $assistantMessage = DB::transaction(function () use ($chat, $assistantText, $assistantReply) {
+            $nextSequence = (Message::where('chat_id', $chat->id)
+                ->lockForUpdate()
+                ->max('sequence') ?? 0) + 1;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Message $message)
-    {
-        //
-    }
+            return Message::create([
+                'chat_id' => $chat->id,
+                'role' => 'assistant',
+                'content' => $assistantText,
+                'raw_json' => $assistantReply,
+                'sequence' => $nextSequence,
+                'model' => 'gemini',
+            ]);
+        });
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Message $message)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Message $message)
-    {
-        //
+        return response()->json([
+            'userMessage' => $userMessage,
+            'assistantMessage' => $assistantMessage,
+        ]);
     }
 }

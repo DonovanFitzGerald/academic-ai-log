@@ -11,11 +11,16 @@ class Message extends Model
     use HasFactory;
 
     protected $fillable = [
+        'chat_id',
         'role',
         'content',
+        'raw_json',
         'sequence',
         'model',
-        'chat_id'
+    ];
+
+    protected $casts = [
+        'raw_json' => 'array',
     ];
 
 }
