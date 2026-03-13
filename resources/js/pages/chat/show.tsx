@@ -1,5 +1,5 @@
-import { router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { router } from '@inertiajs/react';
+import React, { useState, useRef, useEffect } from 'react';
 import { route } from 'ziggy-js';
 import ChatMessage from '@/components/ui/chat-message';
 import AppLayout from '@/layouts/app-layout';
@@ -8,12 +8,12 @@ export default function Show({ chat, messages }) {
     const breadcrumbs = [
         { title: chat.title ?? `Chat #${chat.id}`, href: `/chat/${chat.id}` },
     ];
-    const [sending, setSending] = useState(false);
-    const [awaitingResponse, setAwaitingResponse] = useState(false);
 
-    // Input box handlers
+    const [sending, setSending] = useState(false);
+    const conversationDiv = useRef<HTMLDivElement | null>(null);
     const [inputText, setinputText] = useState('');
-    const handleInputChange = (e) => {
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setinputText(e.target.value);
     };
 
@@ -25,6 +25,7 @@ export default function Show({ chat, messages }) {
 
     const handleInputSubmit = (content: string) => {
         if (!content.trim() || sending) return;
+
         router.post(
             route('chat.messages.store', { chat: chat.id }),
             { content },
@@ -32,26 +33,39 @@ export default function Show({ chat, messages }) {
                 preserveScroll: true,
                 onStart: () => setSending(true),
                 onFinish: () => setSending(false),
-                onSuccess: () => setinputText(''),
+                onSuccess: () => {
+                    setinputText('');
+                },
             },
         );
     };
 
+    useEffect(() => {
+        const el = conversationDiv.current;
+        if (!el) return;
+
+        el.scrollTo({
+            top: el.scrollHeight,
+            behavior: 'smooth',
+        });
+    }, [messages]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="max-h-[90vh] overflow-auto">
+            <div className="max-h-[90vh] overflow-auto" ref={conversationDiv}>
                 <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
-                    {messages.map((m) => {
-                        return <ChatMessage message={m} />;
-                    })}
+                    {messages.map((m) => (
+                        <ChatMessage key={m.id} message={m} />
+                    ))}
                 </div>
+
                 <div className="sticky bottom-0 mt-auto flex w-full justify-center bg-background p-8">
                     <input
                         type="text"
                         className="w-full max-w-lg rounded-3xl border px-6 py-3 shadow-lg"
                         id="message-input"
                         placeholder="Ask anything..."
-                        onChange={(e) => handleInputChange(e)}
+                        onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         value={inputText}
                         disabled={sending}
