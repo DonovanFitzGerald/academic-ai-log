@@ -32,12 +32,13 @@ class MessageController extends Controller
         $assistantReply = $assistantService->call($validated['content']);
 
         $assistantText = data_get($assistantReply, 'candidates.0.content.parts.0.text');
+        $assistantModel = data_get($assistantReply, 'modelVersion');
 
         if (!is_string($assistantText) || trim($assistantText) === '') {
             $assistantText = 'No response returned.';
         }
 
-        $assistantMessage = DB::transaction(function () use ($chat, $assistantText, $assistantReply) {
+        $assistantMessage = DB::transaction(function () use ($chat, $assistantText, $assistantModel, $assistantReply) {
             $nextSequence = (Message::where('chat_id', $chat->id)
                 ->lockForUpdate()
                 ->max('sequence') ?? 0) + 1;
@@ -48,7 +49,7 @@ class MessageController extends Controller
                 'content' => $assistantText,
                 'raw_json' => $assistantReply,
                 'sequence' => $nextSequence,
-                'model' => 'gemini',
+                'model' => $assistantModel,
             ]);
         });
 
