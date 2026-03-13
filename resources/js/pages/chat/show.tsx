@@ -25,7 +25,6 @@ export default function Show({ chat, messages }) {
 
     const handleInputSubmit = (content: string) => {
         if (!content.trim() || sending) return;
-
         router.post(
             route('chat.messages.store', { chat: chat.id }),
             { content },
@@ -40,21 +39,24 @@ export default function Show({ chat, messages }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex flex-col gap-4 p-4">
-                {messages.map((m) => {
-                    return <ChatMessage message={m} />;
-                })}
-            </div>
-            <div className="mt-auto flex w-full justify-center p-8">
-                <input
-                    type="text"
-                    className="w-full max-w-lg rounded-3xl border px-6 py-3"
-                    id="message-input"
-                    placeholder="Ask anything..."
-                    onChange={(e) => handleInputChange(e)}
-                    onKeyDown={handleKeyDown}
-                    value={inputText}
-                />
+            <div className="max-h-[90vh] overflow-auto">
+                <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
+                    {messages.map((m) => {
+                        return <ChatMessage message={m} />;
+                    })}
+                </div>
+                <div className="sticky bottom-0 mt-auto flex w-full justify-center bg-background p-8">
+                    <input
+                        type="text"
+                        className="w-full max-w-lg rounded-3xl border px-6 py-3 shadow-lg"
+                        id="message-input"
+                        placeholder="Ask anything..."
+                        onChange={(e) => handleInputChange(e)}
+                        onKeyDown={handleKeyDown}
+                        value={inputText}
+                        disabled={sending}
+                    />
+                </div>
             </div>
         </AppLayout>
     );
