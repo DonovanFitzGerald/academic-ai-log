@@ -117,16 +117,17 @@ export default function Show({ chat, messages: initialMessages }) {
                     </div>
                 </div>
 
-                <div className="mx-auto flex w-full max-w-3xl justify-center py-8">
+                <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-2 px-6 py-8">
+                    {sending && (
+                        <p className="animate-bounce text-neutral-400">
+                            Awaiting Response...
+                        </p>
+                    )}
                     <input
                         type="text"
                         className="w-full rounded-3xl border px-6 py-3 shadow-lg"
                         id="message-input"
-                        placeholder={
-                            sending
-                                ? 'Waiting for response...'
-                                : 'Ask anything...'
-                        }
+                        placeholder={'Ask anything...'}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         value={inputText}

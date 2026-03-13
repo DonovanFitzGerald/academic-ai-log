@@ -26,7 +26,7 @@ class AssistantService
             ->values()
             ->all();
 
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent';
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
