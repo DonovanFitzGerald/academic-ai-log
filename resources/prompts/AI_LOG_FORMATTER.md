@@ -255,3 +255,5 @@ Before producing output, verify all of the following:
 - The output contains nothing except the required log format.
 
 Now wait for the chat transcript and produce the AI_USE_LOG.
+
+---BEGIN CHAT LOG---

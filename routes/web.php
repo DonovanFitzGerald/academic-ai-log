@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\UseLogController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -23,5 +24,12 @@ Route::get('/chat/{chat}', [ChatController::class, 'show'])
 
 Route::post('/chat/{chat}/messages', [MessageController::class, 'store'])
     ->name('chat.messages.store');
+
+Route::post('/chat/{chat}/use-log', [UseLogController::class, 'store'])
+    ->name('use-log.store');
+
+Route::get('/ai-use-logs/{use_log}', [UseLogController::class, 'show'])
+    ->name('use-log.show');
+
 
 require __DIR__ . '/settings.php';

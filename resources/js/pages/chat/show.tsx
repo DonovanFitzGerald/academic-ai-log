@@ -14,29 +14,51 @@ type Message = {
     updated_at?: string | null;
 };
 
-export default function Show({ chat, messages: initialMessages }) {
+export default function Show({ chat, messages: initialMessages }: any) {
     const breadcrumbs = [
         { title: chat.title ?? `Chat #${chat.id}`, href: `/chat/${chat.id}` },
     ];
 
-    const [messages, setMessages] = useState<Message[]>(initialMessages);
+    const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
     const [sending, setSending] = useState(false);
     const [inputText, setInputText] = useState('');
     const conversationDiv = useRef<HTMLDivElement | null>(null);
 
+    const csrf =
+        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+            ?.content ?? '';
+
     const scrollToBottom = () => {
         const el = conversationDiv.current;
         if (!el) return;
-
-        el.scrollTo({
-            top: el.scrollHeight,
-            behavior: 'smooth',
-        });
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     };
 
     useEffect(() => {
         scrollToBottom();
     }, [messages.length]);
+
+    const requestUseLog = async () => {
+        try {
+            const response = await fetch(
+                route('use-log.store', { chat: chat.id }),
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                },
+            );
+            if (!response.ok) return;
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleInputSubmit = async (content: string) => {
         const trimmed = content.trim();
@@ -45,12 +67,13 @@ export default function Show({ chat, messages: initialMessages }) {
         setSending(true);
         setInputText('');
 
+        const tempId = `temp-user-${Date.now()}`;
         const tempUserMessage: Message = {
-            id: `temp-user-${Date.now()}`,
+            id: tempId,
             chat_id: chat.id,
             role: 'user',
             content: trimmed,
-            sequence: messages.length + 1,
+            sequence: Number.MAX_SAFE_INTEGER,
             model: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -67,32 +90,25 @@ export default function Show({ chat, messages: initialMessages }) {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN':
-                            (
-                                document.querySelector(
-                                    'meta[name="csrf-token"]',
-                                ) as HTMLMetaElement
-                            )?.content ?? '',
+                        'X-CSRF-TOKEN': csrf,
                     },
                     body: JSON.stringify({ content: trimmed }),
                 },
             );
 
-            if (!response.ok) {
-                throw new Error('Failed to send message');
-            }
+            if (!response.ok) throw new Error('Failed to send message');
 
             const data = await response.json();
 
             setMessages((prev) => [
-                ...prev.slice(0, -1),
+                ...prev.filter((m) => m.id !== tempId),
                 data.userMessage,
                 data.assistantMessage,
             ]);
+
+            requestUseLog();
         } catch (error) {
-            setMessages((prev) =>
-                prev.filter((m) => m.id !== tempUserMessage.id),
-            );
+            setMessages((prev) => prev.filter((m) => m.id !== tempId));
             setInputText(trimmed);
             console.error(error);
         } finally {
@@ -126,8 +142,7 @@ export default function Show({ chat, messages: initialMessages }) {
                     <input
                         type="text"
                         className="w-full rounded-3xl border px-6 py-3 shadow-lg"
-                        id="message-input"
-                        placeholder={'Ask anything...'}
+                        placeholder="Ask anything..."
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         value={inputText}
