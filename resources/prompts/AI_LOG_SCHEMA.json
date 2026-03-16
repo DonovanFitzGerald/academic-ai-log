@@ -1,0 +1,107 @@
+{
+    "type": "object",
+    "properties": {
+        "total_use_cases": {
+            "type": "integer",
+            "description": "Total number of distinct AI use cases identified in the transcript.",
+            "minimum": 0
+        },
+        "use_cases": {
+            "type": "array",
+            "description": "Distinct student AI use cases, merged conservatively where appropriate.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "description": "Short action-focused label under 100 characters.",
+                        "maxLength": 99
+                    },
+                    "evidence": {
+                        "type": "string",
+                        "description": "Exactly one neutral sentence describing the student purpose."
+                    },
+                    "input_type": {
+                        "type": "array",
+                        "description": "One or more allowed input types.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "question",
+                                "instructions",
+                                "draft text",
+                                "outline",
+                                "code",
+                                "data",
+                                "image prompt",
+                                "error message",
+                                "reflection notes",
+                                "research topic",
+                                "citation request",
+                                "mixed"
+                            ]
+                        },
+                        "minItems": 1
+                    },
+                    "output_type": {
+                        "type": "array",
+                        "description": "One or more allowed output types.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "explanation",
+                                "summary",
+                                "rewrite",
+                                "ideas",
+                                "outline",
+                                "code",
+                                "debugging help",
+                                "examples",
+                                "feedback",
+                                "grammar correction",
+                                "structure advice",
+                                "citations",
+                                "plan",
+                                "mixed"
+                            ]
+                        },
+                        "minItems": 1
+                    },
+                    "ai_role": {
+                        "type": "string",
+                        "description": "Exactly one allowed AI role.",
+                        "enum": [
+                            "tutor",
+                            "editor",
+                            "brainstorm partner",
+                            "coding assistant",
+                            "research assistant",
+                            "formatter",
+                            "reviewer"
+                        ]
+                    },
+                    "confidence": {
+                        "type": "string",
+                        "description": "Confidence in the classification.",
+                        "enum": ["High", "Medium", "Low"]
+                    }
+                },
+                "required": [
+                    "label",
+                    "evidence",
+                    "input_type",
+                    "output_type",
+                    "ai_role",
+                    "confidence"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "summary_statement": {
+            "type": "string",
+            "description": "One neutral sentence summarising the student's overall AI use."
+        }
+    },
+    "required": ["total_use_cases", "use_cases", "summary_statement"],
+    "additionalProperties": false
+}

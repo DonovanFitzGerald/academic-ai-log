@@ -12,56 +12,26 @@ class UseLogController extends Controller
 {
     public function store(Request $request, Chat $chat, AssistantService $assistantService)
     {
-        $assistantReply = $assistantService->createUseLog($chat);
-
-        $rawText = $this->parseAssitantResponse($assistantReply);
-
-        $total = $this->parseTotalUseCases($rawText);
+        $useLogData = $assistantService->createUseLog($chat);
 
         $chatSnapshot = $chat->messages()
             ->orderBy('sequence')
             ->get(['role', 'content', 'sequence'])
-            ->map(fn($m) => "{$m->sequence}. {$m->role}: {$m->content}")
+            ->map(fn($message) => "{$message->sequence}. {$message->role}: {$message->content}")
             ->implode("\n");
 
-        $useLog = DB::transaction(function () use ($chat, $rawText, $total, $chatSnapshot) {
+        $useLog = DB::transaction(function () use ($chat, $useLogData, $chatSnapshot) {
             return UseLog::create([
                 'chat_id' => $chat->id,
-                'total_use_cases' => $total,
-                'raw_output' => $rawText,
+                'total_use_cases' => $useLogData['total_use_cases'],
+                'raw_output' => json_encode($useLogData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
                 'chat_snapshot' => $chatSnapshot,
             ]);
         });
 
         return response()->json([
             'useLog' => $useLog,
-            'raw' => $assistantReply,
+            'parsed' => $useLogData,
         ]);
-    }
-
-    private function parseAssitantResponse($assistantReply)
-    {
-        $rawParts = data_get($assistantReply, 'candidates.0.content.parts', []);
-        $textParts = array_column($rawParts, 'text');
-        $jointResponses = implode('', $textParts);
-        $cleanedResponses = str_replace(["\n", "\r"], '', $jointResponses);
-
-        return $cleanedResponses;
-    }
-
-    private function parseSummary(string $raw): string
-    {
-        if (preg_match('/SUMMARY:\s*(\d+)/i', $raw, $matches)) {
-            return (int) $matches[1];
-        }
-    }
-    private function parseTotalUseCases(string $raw): int
-    {
-        if (preg_match('/TOTAL_USE_CASES:\s*(\d+)/i', $raw, $matches)) {
-            return (int) $matches[1];
-        }
-
-        preg_match_all('/^\s*\d+\.\s*USE_CASE:/mi', $raw, $matches);
-        return count($matches[0] ?? []);
     }
 }
