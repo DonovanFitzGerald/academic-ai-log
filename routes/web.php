@@ -20,20 +20,21 @@ Route::get('dashboard', function () {
 
 Route::post('/chats', [ChatController::class, 'store'])
     ->middleware(['auth', 'verified'])
-    ->name('chat.store');
+    ->name('chats.store');
 
-Route::get('/chat/{chat}', [ChatController::class, 'show'])
+Route::get('/chats/{chat}', [ChatController::class, 'show'])
     ->middleware(['auth', 'verified'])
-    ->name('chat.show');
+    ->name('chats.show');
 
-Route::post('/chat/{chat}/messages', [MessageController::class, 'store'])
-    ->name('chat.messages.store');
+Route::delete('/chats/{chat}', [ChatController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('chats.destroy');
 
-Route::post('/chat/{chat}/use-log', [UseLogController::class, 'store'])
-    ->name('use-log.store');
+Route::post('/chats/{chat}/messages', [MessageController::class, 'store'])
+    ->name('chats.messages.store');
 
-Route::get('/ai-use-logs/{use_log}', [UseLogController::class, 'show'])
-    ->name('use-log.show');
+Route::post('/chats/{chat}/use-logs', [UseLogController::class, 'store'])
+    ->name('chats.use-logs.store');
 
 
 require __DIR__ . '/settings.php';

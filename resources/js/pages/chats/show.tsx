@@ -20,7 +20,7 @@ export default function Show({
     useLog: UseLog;
 }) {
     const breadcrumbs = [
-        { title: chat.title ?? `Chat #${chat.id}`, href: `/chat/${chat.id}` },
+        { title: chat.title ?? `Chat #${chat.id}`, href: `/chats/${chat.id}` },
     ];
 
     const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
@@ -43,10 +43,16 @@ export default function Show({
         scrollToBottom();
     }, [messages.length]);
 
+    useEffect(() => {
+        setMessages(initialMessages ?? []);
+        setInputText('');
+        setSending(false);
+    }, [chat.id, initialMessages]);
+
     const requestUseLog = async () => {
         try {
             const response = await fetch(
-                route('use-log.store', { chat: chat.id }),
+                route('chats.use-logs.store', { chat: chat.id }),
                 {
                     method: 'POST',
                     headers: {
@@ -90,7 +96,7 @@ export default function Show({
 
         try {
             const response = await fetch(
-                route('chat.messages.store', { chat: chat.id }),
+                route('chats.messages.store', { chat: chat.id }),
                 {
                     method: 'POST',
                     headers: {
@@ -131,7 +137,7 @@ export default function Show({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex h-[90vh] flex-row">
+            <div key={chat.id} className="flex h-[90vh] flex-row">
                 <div className="flex w-full flex-col">
                     <div className="flex-1 overflow-auto" ref={conversationDiv}>
                         <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">

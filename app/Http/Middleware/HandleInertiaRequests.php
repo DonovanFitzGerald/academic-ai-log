@@ -41,17 +41,17 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'chats' => fn () => $request->user()
-                ? \App\Models\Chat::query() 
+            'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'sidebarChats' => fn() => $request->user()
+                ? \App\Models\Chat::query()
                     ->latest('updated_at')
                     ->limit(50)
                     ->get(['id', 'title', 'updated_at'])
-                    ->map(fn ($c) => [
+                    ->map(fn($c) => [
                         'id' => $c->id,
                         'title' => $c->title ?: 'Untitled chat',
                         'updated_at' => optional($c->updated_at)->toISOString(),
-                        'href' => route('chat.show', ['chat' => $c]),
+                        'href' => route('chats.show', ['chat' => $c]),
                     ])
                 : [],
         ];

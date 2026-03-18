@@ -13,8 +13,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
-import chat from '@/routes/chat';
+import chats from '@/routes/chats';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -47,17 +48,23 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { props, url } = usePage<{ chats?: ChatNavItem[] }>();
-    const chats = props.chats ?? [];
+    const { props, url } = usePage<{ sidebarChats?: ChatNavItem[] }>();
+    const sidebarChats = props.sidebarChats ?? [];
 
     const createChat = () => {
-        router.post(chat.store().url, {}, { preserveScroll: true });
+        router.post(chats.store().url, {}, { preserveScroll: true });
     };
 
     const currentChatId = (() => {
-        const match = url.match(/^\/chat\/(\d+)(?:\/)?(?:\?.*)?$/);
+        const match = url.match(/^\/chats\/(\d+)(?:\/)?(?:\?.*)?$/);
         return match ? Number(match[1]) : null;
     })();
+
+    const deleteChat = (id: number) => {
+        router.delete(chats.destroy(id).url, {
+            preserveScroll: true,
+        });
+    };
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -90,27 +97,36 @@ export function AppSidebar() {
                     </SidebarMenu>
                 </SidebarGroup>
                 <SidebarMenu>
-                    {chats.map((c) => {
+                    {sidebarChats.map((c) => {
                         const isActive = currentChatId === c.id;
                         return (
                             <SidebarMenuItem key={c.id}>
                                 <SidebarMenuButton
-                                    asChild
-                                    className={isActive ? 'bg-neutral-100' : ''}
+                                    className={cn(
+                                        'group/chat',
+                                        isActive ? 'bg-neutral-100' : '',
+                                    )}
                                 >
                                     <Link
-                                        href={chat.show(c.id).url}
+                                        href={chats.show(c.id).url}
                                         prefetch
-                                        className="group/chat"
+                                        className="flex-1 truncate"
                                     >
-                                        <p className="truncate">{c.title}</p>
-                                        <button
-                                            className="ml-auto hidden cursor-pointer rounded-sm p-1 group-hover/chat:flex"
-                                            title="delete chat"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
+                                        {c.title}
                                     </Link>
+
+                                    <a
+                                        type="button"
+                                        className="ml-2 hidden cursor-pointer rounded-sm p-1 text-neutral-500 group-hover/chat:inline-flex"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            deleteChat(c.id);
+                                        }}
+                                        title="delete chat"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </a>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         );

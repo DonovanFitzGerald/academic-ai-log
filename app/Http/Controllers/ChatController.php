@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Chat;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class ChatController extends Controller
 {
@@ -14,12 +13,12 @@ class ChatController extends Controller
             'title' => 'New chat',
         ]);
 
-        return redirect()->route('chat.show', $chat);
+        return redirect()->route('chats.show', $chat)->setStatusCode(303);
     }
 
     public function show(Chat $chat)
     {
-        return inertia('chat/show', [
+        return inertia('chats/show', [
             'chat' => $chat,
             'messages' => $chat->messages()
                 ->orderBy('sequence')
@@ -29,5 +28,10 @@ class ChatController extends Controller
                 ->latest('created_at')
                 ->first(),
         ]);
+    }
+
+    public function destroy(Chat $chat)
+    {
+        $chat->delete();
     }
 }
