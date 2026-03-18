@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ChatSeeder::class,
             MessageSeeder::class,
+            UseLogSeeder::class,
         ]);
 
         // User::factory(10)->create();

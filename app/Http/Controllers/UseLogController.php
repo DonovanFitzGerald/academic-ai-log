@@ -30,7 +30,7 @@ class UseLogController extends Controller
                 'chat_snapshot' => $chatSnapshot,
             ]);
 
-            $useLog->use_cases()->createMany(
+            $useLog->useCases()->createMany(
                 collect($useLogData['use_cases'] ?? [])
                     ->values()
                     ->map(fn(array $useCase, int $index) => [
