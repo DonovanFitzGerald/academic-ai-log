@@ -99,7 +99,7 @@ export function AppSidebar() {
                                     className={isActive ? 'bg-neutral-100' : ''}
                                 >
                                     <Link href={chat.show(c.id).url} prefetch>
-                                        {c.title}
+                                        <p className="truncate">{c.title}</p>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
