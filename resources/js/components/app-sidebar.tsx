@@ -1,5 +1,5 @@
 import { Link, usePage, router } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Plus } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Plus, Trash2 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -98,8 +98,18 @@ export function AppSidebar() {
                                     asChild
                                     className={isActive ? 'bg-neutral-100' : ''}
                                 >
-                                    <Link href={chat.show(c.id).url} prefetch>
+                                    <Link
+                                        href={chat.show(c.id).url}
+                                        prefetch
+                                        className="group/chat"
+                                    >
                                         <p className="truncate">{c.title}</p>
+                                        <button
+                                            className="ml-auto hidden cursor-pointer rounded-sm p-1 group-hover/chat:flex"
+                                            title="delete chat"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
