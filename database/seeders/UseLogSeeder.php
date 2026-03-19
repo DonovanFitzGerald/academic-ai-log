@@ -12,7 +12,7 @@ class UseLogSeeder extends Seeder
 {
     public function run(): void
     {
-        $chats = Chat::query()->take(10)->get();
+        $chats = Chat::get();
 
         foreach ($chats as $chat) {
             DB::transaction(function () use ($chat) {
