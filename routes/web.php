@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\UseLogController;
 
@@ -14,9 +15,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::post('/chats', [ChatController::class, 'store'])
     ->middleware(['auth', 'verified'])
