@@ -1,11 +1,11 @@
-import type { UseLog, UseCase } from '@/types/assistant';
 import { MoveRight } from 'lucide-react';
+import type { UseLog, UseCase } from '@/types/assistant';
 
 const UseLogDisplay = ({ useLog }: { useLog: UseLog }) => {
     if (!useLog) return;
     console.log(useLog);
     return (
-        <div className="mx-auto flex max-w-2xl flex-1 flex-col gap-6 p-6">
+        <div className="mx-auto flex max-w-2xl flex-1 flex-col gap-6 border-l border-sidebar-border/50 p-6">
             <div className="">
                 <p className="mt-2 font-medium">
                     Use Cases: {useLog.total_use_cases}
@@ -38,13 +38,35 @@ const UseCaseCard = ({
             <div className="flex flex-col gap-2 text-sm text-neutral-600">
                 <p>{useCase.evidence}</p>
                 <p className="text-neutral-400">
-                    <span className="font-medium">Assistant Role:</span>{' '}
+                    <span className="font-medium">Assistant Role:</span>
                     {useCase.assistant_role}
                 </p>
-                <div className="flex justify-between pt-2 text-xs text-neutral-400 uppercase">
-                    <span className="">{useCase.input_type.join(', ')}</span>
-                    <MoveRight className="h-4" />
-                    <span className="">{useCase.output_type.join(', ')}</span>
+                <div className="grid grid-cols-3 pt-2 text-xs text-neutral-400 uppercase">
+                    <div>
+                        {useCase.input_type.map((t, i) => {
+                            return (
+                                <p>
+                                    {t}
+                                    {i + 1 !== useCase.output_type.length
+                                        ? ','
+                                        : ''}
+                                </p>
+                            );
+                        })}
+                    </div>
+                    <MoveRight className="mx-auto h-4" />
+                    <div>
+                        {useCase.output_type.map((t, i) => {
+                            return (
+                                <p>
+                                    {t}
+                                    {i + 1 == useCase.output_type.length
+                                        ? ','
+                                        : ''}
+                                </p>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
