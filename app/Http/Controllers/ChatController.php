@@ -18,7 +18,7 @@ class ChatController extends Controller
 
     public function show(Chat $chat)
     {
-        return inertia('chats/show', [
+        return inertia('chat', [
             'chat' => $chat,
             'messages' => $chat->messages()
                 ->orderBy('sequence')
