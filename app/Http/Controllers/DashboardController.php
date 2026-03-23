@@ -34,27 +34,17 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard', [
             'chartCounts' => [
-                'inputs' => $this->topNPlusOther($inputCounts, 6),
-                'outputs' => $this->topNPlusOther($outputCounts, 6),
-                'roles' => $this->topNPlusOther($roleCounts, 10),
+                'inputs' => $this->formatLabels($inputCounts),
+                'outputs' => $this->formatLabels($outputCounts),
+                'roles' => $this->formatLabels($roleCounts),
             ],
         ]);
     }
 
-    private function topNPlusOther(array $counts, int $n): array
+    private function formatLabels(array $counts): array
     {
         $labels = array_keys($counts);
         $values = array_values($counts);
-
-        $topLabels = array_slice($labels, 0, $n);
-        $topValues = array_slice($values, 0, $n);
-
-        $other = array_sum(array_slice($values, $n));
-        if ($other > 0) {
-            $topLabels[] = 'Other';
-            $topValues[] = $other;
-        }
-
-        return ['labels' => $topLabels, 'values' => $topValues];
+        return ['labels' => $labels, 'values' => $values];
     }
 }
