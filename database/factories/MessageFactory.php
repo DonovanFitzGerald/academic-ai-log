@@ -25,6 +25,7 @@ class MessageFactory extends Factory
                 ? fake()->sentence(fake()->numberBetween(4, 12))
                 : fake()->paragraphs(fake()->numberBetween(1, 3), true),
             'sequence' => fake()->numberBetween(1, 1000),
+            'tokens' => fake()->numberBetween(1, 10000),
             'model' => $role === 'assistant'
                 ? fake()->randomElement(['gemini'])
                 : null,

@@ -15,6 +15,7 @@ class Message extends Model
         'role',
         'content',
         'raw_json',
+        'tokens',
         'sequence',
         'model',
     ];

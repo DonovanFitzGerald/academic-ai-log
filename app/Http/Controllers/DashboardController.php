@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         $cases = UseLogCase::query()->get(['input_type', 'output_type', 'assistant_role',]);
         $prompts = Message::query()->where('role', 'user')->get(['created_at']);
-        $assistant_responses = Message::query()->where('role', 'assistant')->get(['raw_json']);
+        $assistant_responses = Message::query()->where('role', 'assistant')->get(['tokens', 'model']);
 
         $inputCounts = [];
         $outputCounts = [];

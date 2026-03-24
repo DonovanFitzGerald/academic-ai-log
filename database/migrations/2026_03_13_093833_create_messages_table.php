@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignIdFor(Chat::class)->constrained()->cascadeOnDelete();
             $table->string('role');
             $table->longText('content');
+            $table->unsignedInteger('tokens')->nullable();
             $table->unsignedInteger('sequence');
             $table->string('model')->nullable();
             $table->json('raw_json')->nullable();
