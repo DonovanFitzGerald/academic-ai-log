@@ -32,7 +32,7 @@ const UseCaseCard = ({
         <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
             <div className="flex justify-between">
                 <h3 className="mb-2 text-lg font-semibold">{useCase.label}</h3>
-                <h3 className="text-neutral-400">{index}</h3>
+                <h3 className="text-neutral-400">{index + 1}</h3>
             </div>
             <div className="flex flex-col gap-2 text-sm text-neutral-600">
                 <p>{useCase.evidence}</p>
