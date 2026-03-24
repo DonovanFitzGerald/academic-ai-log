@@ -59,7 +59,7 @@ const UseCaseCard = ({
                             return (
                                 <p key={`${index}-out-${i}`}>
                                     {t}
-                                    {i + 1 == useCase.output_type.length
+                                    {i + 1 !== useCase.output_type.length
                                         ? ','
                                         : ''}
                                 </p>
