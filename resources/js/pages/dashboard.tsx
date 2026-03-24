@@ -19,7 +19,10 @@ type Counts = {
 };
 
 export default function Dashboard() {
-    const { chartCounts } = usePage().props as { chartCounts: Counts };
+    const { chartCounts, prompts, assistantResponses } = usePage().props as {
+        chartCounts: Counts;
+    };
+    console.log(chartCounts, prompts, assistantResponses);
 
     const makeData = (
         labels: string[],
